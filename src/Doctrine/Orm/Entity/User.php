@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="Doctrine\Orm\Repository\UserRepository")
  * @ORM\Table(name="public.user")
  */
 final class User

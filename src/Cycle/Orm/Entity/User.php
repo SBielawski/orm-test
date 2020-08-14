@@ -10,13 +10,14 @@ use Symfony\Component\Uid\Uuid;
 /**
  * @Cycle\Entity(
  *     role = "user",
- *     table = "public.user"
+ *     table = "public.user",
+ *     repository = "Cycle\Orm\Repository\UserRepository"
  * )
  */
 final class User
 {
     /**
-     * @Cycle\Column(type="primary")
+     * @Cycle\Column(type="string", primary=true)
      */
     protected string $id;
 

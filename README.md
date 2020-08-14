@@ -1,6 +1,6 @@
 # ORM test
 Testy bibliotek ORM:
-- CycleORM 1.0
+- CycleORM 1.2
 - DoctrineORM 2.7
 
 *! Całość jest w fazie BETA więc proszę o wyrozumiałość. Czasy są wrzucone poglądowo, bo zazwyczaj uruchamiałem każdy z 
@@ -110,14 +110,141 @@ Time: 165814 ms
 
 *Wnioski*
 
-Cycle ORM tutaj deklasuje Doctrine o 50% jeśli chodzi o czas. Jeżeli chodzi o ilość użytej pamięci to także widać 
+Cycle ORM tutaj deklasuje Doctrine o ~50% jeśli chodzi o czas. Jeżeli chodzi o ilość użytej pamięci to także widać 
 sporą różnicę. Dla pewności powtórzyłem test kilkukrotnie, ale dystans był zawsze niemal identyczny.
 
 PS. Wiartaki w moim laptopie się strasznie męczyły przy Doctrine, co też świadczy o optymalizacji. W przypadku Cycle 
 aż takiej tragedii nie było.
 
-#### Limit 128M
+#### Pobieranie użytkowników
 
-Test zakłada utworzenie jak najwiekszej ilości użytkowników przed przekroczeniem 128MB pamięci.
+##### Wyciąganie pojedyńczego obiektu
 
+Wyciąganie pojedyńczego obiektu użytkownika powtórzone 1000 razy.
 
+*Doctrine ORM*
+
+Istniejące wpisy w bazie danych
+
+```
+root@e64bed994f5d:/app# bin/doctrine-orm orm:user:get -c 1000 -f
+Cleanup database
+Create users in database
+Single fetch mode
+------ OVERALL ------
+Memory: 14336 kB
+Time: 375 ms
+```
+
+Nie istniejące wpisy w bazie danych
+
+```
+root@e64bed994f5d:/app# bin/doctrine-orm orm:user:get -c 1000
+Cleanup database
+Single fetch mode
+------ OVERALL ------
+Memory: 6144 kB
+Time: 122 ms
+```
+
+*Cycle ORM*
+
+Istniejące wpisy w bazie danych
+
+```
+root@e64bed994f5d:/app# bin/cycle-orm orm:user:get -c 1000 -f
+Cleanup database
+Create users in database
+Single fetch mode
+------ OVERALL ------
+Memory: 12288 kB
+Time: 334 ms
+```
+
+Nie istniejące wpisy w bazie danych
+
+```
+root@e64bed994f5d:/app# bin/cycle-orm orm:user:get -c 1000
+Cleanup database
+Single fetch mode
+------ OVERALL ------
+Memory: 6144 kB
+Time: 81 ms
+```
+
+*Wnioski*
+
+Cycle ORM wymagał mniej pamięci jak zwykle. Czasy pobierania są zbliżone z niewielkim wskazaniem na Cycle ORM. 
+Ciekawe jednak jest to, że w przypadku pobierania nie istniejących wpisów Cycle ORM okazał się o ~33% szybszy. 
+Oba notowały większ lub mniejsze skoki w czasie wykonania, ale Doctrine miał tutaj dużo większą rozbieżność.
+
+##### Wyciąganie listy obiektów
+
+Wyciąganie listy 1000 obiektów użytkownika powtórzone 1000 razy.
+
+*Doctrine ORM*
+
+Istniejące wpisy w bazie danych
+
+```
+root@e64bed994f5d:/app# bin/doctrine-orm orm:user:get -c 1000 -f -l
+Cleanup database
+Create users in database
+List fetch mode
+------ OVERALL ------
+Memory: 16384 kB
+Time: 10357 ms
+```
+
+Nie istniejące wpisy w bazie danych
+
+```
+root@e64bed994f5d:/app# bin/doctrine-orm orm:user:get -c 1000 -l
+Cleanup database
+List fetch mode
+------ OVERALL ------
+Memory: 8192 kB
+Time: 160 ms
+```
+
+*Cycle ORM*
+
+Istniejące wpisy w bazie danych
+
+```
+root@e64bed994f5d:/app# bin/cycle-orm orm:user:get -c 1000 -f -l
+Cleanup database
+Create users in database
+List fetch mode
+------ OVERALL ------
+Memory: 12288 kB
+Time: 12233 ms
+```
+
+Nie istniejące wpisy w bazie danych
+
+```
+root@e64bed994f5d:/app# bin/cycle-orm orm:user:get -c 1000 -l
+Cleanup database
+List fetch mode
+------ OVERALL ------
+Memory: 6144 kB
+Time: 83 ms
+```
+
+*Wnioski*
+
+Doctrine ORM wygrał o prawie 2 sekundy (20%) jeśli chodzi o odczyt wielu rekordów na raz, jednak zużył o ~25% więcej 
+pamięci. Natomiast Cycle ORM okazał się lepszy jeśli chodzi o czas odczytu nie istniejących danych o ~50%.
+
+## Uwagi
+
+*Cycle ORM*
+
+- Nie ma opcji limitowania wyników na `fetchAll` w obiekcie repozytorium. Trzeba to robić przez `QueryBuilder`.
+- Metoda `fetchAll` w obiekcie repozytorium zwraca tablicę. Nie ma obiektu kolekcji.
+
+*Doctrine ORM*
+
+- Nie ma żadnych opcji na `fetchAll` w obiekcie repozytorium. Trzeba to robić przez `QueryBuilder`.
+- Metoda `fetchAll` w obiekcie repozytorium zwraca tablicę. Nie ma obiektu kolekcji.

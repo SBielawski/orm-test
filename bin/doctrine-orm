@@ -4,6 +4,7 @@
 require __DIR__.'/../vendor/autoload.php';
 
 use Doctrine\Orm\Command\OrmUserCreateCommand;
+use Doctrine\Orm\Command\OrmUserGetCommand;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
 use Doctrine\ORM\Tools\Setup;
@@ -37,4 +38,5 @@ $dispatcher->addListener(ConsoleEvents::COMMAND, function (ConsoleCommandEvent $
 $application = new Application('Doctrine ORM test', '1.0');
 $application->setDispatcher($dispatcher);
 $application->add(new OrmUserCreateCommand($entityManager));
+$application->add(new OrmUserGetCommand($entityManager));
 $application->run();

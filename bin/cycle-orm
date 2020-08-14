@@ -5,6 +5,7 @@ require __DIR__.'/../vendor/autoload.php';
 
 use Cycle\Annotated;
 use Cycle\Orm\Command\OrmUserCreateCommand;
+use Cycle\Orm\Command\OrmUserGetCommand;
 use Cycle\ORM\Factory;
 use Cycle\ORM\ORM;
 use Cycle\Schema;
@@ -64,4 +65,5 @@ $dispatcher->addListener(ConsoleEvents::COMMAND, function (ConsoleCommandEvent $
 $application = new Application('Cycle ORM test', '1.0');
 $application->setDispatcher($dispatcher);
 $application->add(new OrmUserCreateCommand($orm));
+$application->add(new OrmUserGetCommand($orm));
 $application->run();
