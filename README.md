@@ -3,8 +3,10 @@ Testy bibliotek ORM:
 - CycleORM 1.2
 - DoctrineORM 2.7
 
-*! Całość jest w fazie BETA więc proszę o wyrozumiałość. Czasy są wrzucone poglądowo, bo zazwyczaj uruchamiałem każdy z 
-testów wielokrotnie i wybierałem najbardziej zbliżone wyniki*
+## Słowo od autora
+*Całość jest w fazie BETA więc proszę o wyrozumiałość. Czasy są wrzucone poglądowo, bo zazwyczaj uruchamiałem każdy z 
+testów wielokrotnie i wybierałem najbardziej zbliżone wyniki. Używam do celów osobistych, ale jak masz chęć pomóc, albo 
+zwrócić uwagę, że coś źle robię to się nie obrażę :)*
 
 ## Uruchomienie
 
@@ -32,6 +34,26 @@ Zbudowany wyłącznie z typów prostych, aby nie zaburzać wyników pomiarów dl
 danych w ORM.
 
 ## Testy
+
+W planach:
+- Usuwanie użytkowników (pojedyńcze i masowe)
+- Aktualizacja użytkowników (pojedyńcza i masowa)
+- Stworzenie obiektu `Product` z embedami oraz testy
+    - Dodanie (na jednej i wielu transakcjach)
+    - Odczyt (pojedyńczy i masowy)
+    - Usuwanie (pojedyńcze i masowe)
+    - Aktualizacja (pojedyńcza i masowa)
+- Stworzenie obiektu `Lead` z relacjami do `Product` i `User`
+    - Dodanie (na jednej i wielu transakcjach)
+    - Odczyt (pojedyńczy i masowy)
+    - Usuwanie (pojedyńcze i masowe)
+    - Aktualizacja (pojedyńcza i masowa)
+- Testy DBAL
+    - Dodanie (na jednej i wielu transakcjach)
+    - Odczyt (pojedyńczy i masowy)
+    - Usuwanie (pojedyńcze i masowe)
+    - Aktualizacja (pojedyńcza i masowa)
+- Spisanie wniosków końcowych dotyczących zalet i wad każdego z ORM
 
 ### Tworzenie użytkowników
 
@@ -241,10 +263,10 @@ pamięci. Natomiast Cycle ORM okazał się lepszy jeśli chodzi o czas odczytu n
 
 *Cycle ORM*
 
-- Nie ma opcji limitowania wyników na `fetchAll` w obiekcie repozytorium. Trzeba to robić przez `QueryBuilder`.
-- Metoda `fetchAll` w obiekcie repozytorium zwraca tablicę. Nie ma obiektu kolekcji.
+- Nie ma opcji limitowania wyników na `findAll` w obiekcie repozytorium. Trzeba to robić przez `QueryBuilder`.
+- Metoda `findAll` w obiekcie repozytorium zwraca tablicę. Nie ma obiektu kolekcji.
 
 *Doctrine ORM*
 
-- Nie ma żadnych opcji na `fetchAll` w obiekcie repozytorium. Trzeba to robić przez `QueryBuilder`.
-- Metoda `fetchAll` w obiekcie repozytorium zwraca tablicę. Nie ma obiektu kolekcji.
+- Nie ma żadnych opcji na `findAll` w obiekcie repozytorium. Trzeba to robić przez `QueryBuilder`.
+- Metoda `findAll` w obiekcie repozytorium zwraca tablicę. Nie ma obiektu kolekcji.
