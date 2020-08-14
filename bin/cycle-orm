@@ -1,0 +1,67 @@
+#!/usr/bin/env php
+<?php
+
+require __DIR__.'/../vendor/autoload.php';
+
+use Cycle\Annotated;
+use Cycle\Orm\Command\OrmUserCreateCommand;
+use Cycle\ORM\Factory;
+use Cycle\ORM\ORM;
+use Cycle\Schema;
+use Spiral\Database;
+use Spiral\Tokenizer;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+
+// cycle configuration
+$dbal = new Database\DatabaseManager(
+    new Database\Config\DatabaseConfig([
+        'default' => 'default',
+        'databases' => [
+            'default' => [
+                'connection' => 'postgres',
+            ],
+        ],
+        'connections' => [
+            'postgres' => [
+                'driver' => Database\Driver\Postgres\PostgresDriver::class,
+                'connection' => 'pgsql:host=orm-test-postgres;port=5432;dbname=orm',
+                'username' => 'postgres',
+                'password' => '1234',
+            ],
+        ],
+    ])
+);
+$orm = new ORM(new Factory($dbal));
+
+$cl = (new Tokenizer\Tokenizer(new Tokenizer\Config\TokenizerConfig(['directories' => [__DIR__.'/../src/Cycle/Orm']])))->classLocator();
+
+$schema = (new Schema\Compiler())->compile(new Schema\Registry($dbal), [
+    new Annotated\Embeddings($cl), // register annotated embeddings
+    new Annotated\Entities($cl), // register annotated entities
+    new Schema\Generator\ResetTables(), // re-declared table schemas (remove columns)
+    new Annotated\MergeColumns(), // register non field columns (table level)
+    new Schema\Generator\GenerateRelations(), // generate entity relations
+    new Schema\Generator\ValidateEntities(), // make sure all entity schemas are correct
+    new Schema\Generator\RenderTables(), // declare table schemas
+    new Schema\Generator\RenderRelations(), // declare relation keys and indexes
+    new Annotated\MergeIndexes(), // register non entity indexes (table level)
+    new Schema\Generator\SyncTables(), // sync table changes to database
+    new Schema\Generator\GenerateTypecast(), // typecast non string columns
+]);
+
+$orm = $orm->withSchema(new Cycle\ORM\Schema($schema));
+
+// console command configuration
+$dispatcher = new EventDispatcher();
+$dispatcher->addListener(ConsoleEvents::COMMAND, function (ConsoleCommandEvent $event) use ($dbal) {
+    $event->getOutput()->writeln('Cleanup database');
+    $dbal->database('default')->execute('TRUNCATE TABLE public.user');
+});
+
+$application = new Application('Cycle ORM test', '1.0');
+$application->setDispatcher($dispatcher);
+$application->add(new OrmUserCreateCommand($orm));
+$application->run();

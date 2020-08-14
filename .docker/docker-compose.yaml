@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+    orm-test-php:
+        build:
+            context: "."
+        command: ["tail", "-f", "/var/log/faillog"]
+        volumes:
+            - "./../:/app"
+        depends_on:
+            - "orm-test-postgres"
+        links:
+            - "orm-test-postgres"
+
+    orm-test-postgres:
+        image: "postgres:12-alpine"
+        environment:
+            POSTGRES_PASSWORD: "1234"
+        volumes:
+            - "./postgres/init:/docker-entrypoint-initdb.d:delegated"
+        ports:
+            - "5432:5432"

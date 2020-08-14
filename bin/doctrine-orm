@@ -1,0 +1,40 @@
+#!/usr/bin/env php
+<?php
+
+require __DIR__.'/../vendor/autoload.php';
+
+use Doctrine\Orm\Command\OrmUserCreateCommand;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
+use Doctrine\ORM\Tools\Setup;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+
+// doctrine configuration
+$config = Setup::createAnnotationMetadataConfiguration(
+    [__DIR__.'/../src/Doctrine/Orm'],
+    true,
+    null,
+    null,
+    false
+);
+$config->setNamingStrategy(new UnderscoreNamingStrategy(CASE_LOWER));
+$conn = [
+    'driver' => 'pdo_pgsql',
+    'url' => 'pgsql://postgres:1234@orm-test-postgres/orm',
+];
+$entityManager = EntityManager::create($conn, $config);
+
+// console command configuration
+$dispatcher = new EventDispatcher();
+$dispatcher->addListener(ConsoleEvents::COMMAND, function (ConsoleCommandEvent $event) use ($entityManager) {
+    $event->getOutput()->writeln('Cleanup database');
+    $entityManager->getConnection()->query('TRUNCATE TABLE public.user')->execute();
+});
+
+$application = new Application('Doctrine ORM test', '1.0');
+$application->setDispatcher($dispatcher);
+$application->add(new OrmUserCreateCommand($entityManager));
+$application->run();
